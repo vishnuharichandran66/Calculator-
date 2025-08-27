@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Multi Calculator</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f3f3f3;
+      text-align: center;
+      margin: 0;
+      padding: 0;
+    }
+    h1 {
+      background: #007BFF;
+      color: white;
+      padding: 15px;
+      margin: 0;
+    }
+    .tabs {
+      display: flex;
+      justify-content: center;
+      margin: 15px 0;
+    }
+    .tab {
+      background: #ddd;
+      padding: 10px 20px;
+      margin: 0 5px;
+      cursor: pointer;
+      border-radius: 5px;
+    }
+    .tab.active {
+      background: #007BFF;
+      color: white;
+    }
+    .calculator {
+      display: none;
+      margin-top: 20px;
+    }
+    .calculator.active {
+      display: block;
+    }
+    input, button, select {
+      padding: 10px;
+      margin: 5px;
+      border-radius: 5px;
+      border: 1px solid #ccc;
+      font-size: 16px;
+    }
+    .result {
+      margin-top: 10px;
+      font-weight: bold;
+      font-size: 18px;
+    }
+  </style>
+</head>
+<body>
+  <h1>Multi Calculator</h1>
+
+  <div class="tabs">
+    <div class="tab active" onclick="showCalc('basic')">Basic</div>
+    <div class="tab" onclick="showCalc('scientific')">Scientific</div>
+    <div class="tab" onclick="showCalc('special')">Special</div>
+  </div>
+
+  <!-- Basic Calculator -->
+  <div id="basic" class="calculator active">
+    <h2>Basic Calculator</h2>
+    <input type="number" id="num1" placeholder="Enter number">
+    <input type="number" id="num2" placeholder="Enter number">
+    <br>
+    <button onclick="basicCalc('+')">+</button>
+    <button onclick="basicCalc('-')">-</button>
+    <button onclick="basicCalc('*')">×</button>
+    <button onclick="basicCalc('/')">÷</button>
+    <div class="result" id="basicResult"></div>
+  </div>
+
+  <!-- Scientific Calculator -->
+  <div id="scientific" class="calculator">
+    <h2>Scientific Calculator</h2>
+    <input type="text" id="sciInput" placeholder="Enter expression e.g. sin(30)">
+    <button onclick="scientificCalc()">Calculate</button>
+    <div class="result" id="sciResult"></div>
+  </div>
+
+  <!-- Special Calculator -->
+  <div id="special" class="calculator">
+    <h2>Special Calculator</h2>
+    <p>Choose type:</p>
+    <select id="specialType" onchange="changeSpecial()">
+      <option value="bmi">BMI Calculator</option>
+      <option value="age">Age Calculator</option>
+      <option value="emi">EMI Calculator</option>
+    </select>
+
+    <div id="specialContent"></div>
+    <div class="result" id="specialResult"></div>
+  </div>
+
+  <script>
+    // Tab switching
+    function showCalc(id) {
+      document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
+      document.querySelectorAll('.calculator').forEach(calc => calc.classList.remove('active'));
+      document.querySelector(`.tab[onclick="showCalc('${id}')"]`).classList.add('active');
+      document.getElementById(id).classList.add('active');
+    }
+
+    // Basic Calculator
+    function basicCalc(op) {
+      let a = parseFloat(document.getElementById("num1").value);
+      let b = parseFloat(document.getElementById("num2").value);
+      let result;
+      if (op === "+") result = a + b;
+      else if (op === "-") result = a - b;
+      else if (op === "*") result = a * b;
+      else if (op === "/") result = b !== 0 ? a / b : "Error (÷0)";
+      document.getElementById("basicResult").innerText = "Result: " + result;
+    }
+
+    // Scientific Calculator
+    function scientificCalc() {
+      let exp = document.getElementById("sciInput").value;
+      try {
+        exp = exp.replace(/sin\(([^)]+)\)/g, (_, angle) => Math.sin(toRadians(angle)));
+        exp = exp.replace(/cos\(([^)]+)\)/g, (_, angle) => Math.cos(toRadians(angle)));
+        exp = exp.replace(/tan\(([^)]+)\)/g, (_, angle) => Math.tan(toRadians(angle)));
+        exp = exp.replace(/log\(([^)]+)\)/g, (_, num) => Math.log10(num));
+        exp = exp.replace(/ln\(([^)]+)\)/g, (_, num) => Math.log(num));
+        exp = exp.replace(/√\(([^)]+)\)/g, (_, num) => Math.sqrt(num));
+        let result = eval(exp);
+        document.getElementById("sciResult").innerText = "Result: " + result;
+      } catch (e) {
+        document.getElementById("sciResult").innerText = "Invalid Expression";
+      }
+    }
+    function toRadians(deg) { return deg * Math.PI / 180; }
+
+    // Special Calculator
+    function changeSpecial() {
+      let type = document.getElementById("specialType").value;
+      let content = "";
+      if (type === "bmi") {
+        content = `
+          <input type="number" id="weight" placeholder="Weight (kg)">
+          <input type="number" id="height" placeholder="Height (m)">
+          <button onclick="bmiCalc()">Calculate</button>
+        `;
+      } else if (type === "age") {
+        content = `
+          <input type="date" id="dob">
+          <button onclick="ageCalc()">Calculate</button>
+        `;
+      } else if (type === "emi") {
+        content = `
+          <input type="number" id="loan" placeholder="Loan Amount">
+          <input type="number" id="rate" placeholder="Interest Rate (%)">
+          <input type="number" id="time" placeholder="Time (years)">
+          <button onclick="emiCalc()">Calculate</button>
+        `;
+      }
+      document.getElementById("specialContent").innerHTML = content;
+      document.getElementById("specialResult").innerText = "";
+    }
+
+    function bmiCalc() {
+      let w = parseFloat(document.getElementById("weight").value);
+      let h = parseFloat(document.getElementById("height").value);
+      let bmi = w / (h * h);
+      document.getElementById("specialResult").innerText = "BMI: " + bmi.toFixed(2);
+    }
+
+    function ageCalc() {
+      let dob = new Date(document.getElementById("dob").value);
+      let diff = Date.now() - dob.getTime();
+      let age = new Date(diff).getUTCFullYear() - 1970;
+      document.getElementById("specialResult").innerText = "Age: " + age + " years";
+    }
+
+    function emiCalc() {
+      let p = parseFloat(document.getElementById("loan").value);
+      let r = parseFloat(document.getElementById("rate").value) / 100 / 12;
+      let n = parseFloat(document.getElementById("time").value) * 12;
+      let emi = (p * r * Math.pow(1 + r, n)) / (Math.pow(1 + r, n) - 1);
+      document.getElementById("specialResult").innerText = "EMI: ₹" + emi.toFixed(2);
+    }
+
+    // Load default special calculator
+    changeSpecial();
+  </script>
+</body>
+</html>
