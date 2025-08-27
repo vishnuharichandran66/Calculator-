@@ -93,6 +93,7 @@
       <option value="bmi">BMI Calculator</option>
       <option value="age">Age Calculator</option>
       <option value="emi">EMI Calculator</option>
+      <option value="cgpa">CGPA/GPA Calculator</option>
     </select>
 
     <div id="specialContent"></div>
@@ -160,6 +161,13 @@
           <input type="number" id="time" placeholder="Time (years)">
           <button onclick="emiCalc()">Calculate</button>
         `;
+      } else if (type === "cgpa") {
+        content = `
+          <p>Enter number of subjects:</p>
+          <input type="number" id="subjectCount" min="1" placeholder="e.g. 5">
+          <button onclick="generateCGPAFields()">Next</button>
+          <div id="cgpaFields"></div>
+        `;
       }
       document.getElementById("specialContent").innerHTML = content;
       document.getElementById("specialResult").innerText = "";
@@ -185,6 +193,34 @@
       let n = parseFloat(document.getElementById("time").value) * 12;
       let emi = (p * r * Math.pow(1 + r, n)) / (Math.pow(1 + r, n) - 1);
       document.getElementById("specialResult").innerText = "EMI: ₹" + emi.toFixed(2);
+    }
+
+    // CGPA Calculator
+    function generateCGPAFields() {
+      let count = parseInt(document.getElementById("subjectCount").value);
+      let fields = "";
+      for (let i = 1; i <= count; i++) {
+        fields += `
+          <input type="number" id="grade${i}" placeholder="Grade Point (e.g. 9)">
+          <input type="number" id="credit${i}" placeholder="Credit (e.g. 3)"><br>
+        `;
+      }
+      fields += `<button onclick="cgpaCalc(${count})">Calculate CGPA</button>`;
+      document.getElementById("cgpaFields").innerHTML = fields;
+    }
+
+    function cgpaCalc(count) {
+      let totalCredits = 0, totalPoints = 0;
+      for (let i = 1; i <= count; i++) {
+        let grade = parseFloat(document.getElementById("grade" + i).value);
+        let credit = parseFloat(document.getElementById("credit" + i).value);
+        if (!isNaN(grade) && !isNaN(credit)) {
+          totalCredits += credit;
+          totalPoints += grade * credit;
+        }
+      }
+      let cgpa = totalPoints / totalCredits;
+      document.getElementById("specialResult").innerText = "CGPA: " + cgpa.toFixed(2);
     }
 
     // Load default special calculator
